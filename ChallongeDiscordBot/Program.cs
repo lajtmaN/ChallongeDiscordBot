@@ -15,10 +15,17 @@ namespace ChallongeDiscordBot
             foreach (ChallongeDiscordBotConfig bot in config.Instances)
             {
                 Console.WriteLine($"Creating bot for: {bot.Name} using ApiKey: {bot.ApiKey}");
-                new ChallongeDataLoader(bot.ApiKey, bot.Subdomain, bot.CreatedAfter).LoadNewestData();
+                var loader = new ChallongeDataLoader(bot.ApiKey, bot.Subdomain, bot.CreatedAfter);
+                LoadCS(loader);
             }
             Console.ReadLine();
+        }
 
+        static async void LoadCS(ChallongeDataLoader loader)
+        {
+            var tournament = await loader.LoadTournament("lajtman_discord");
+            var matches = await tournament.GetAllOpenMatches();
+            
         }
     }
 }

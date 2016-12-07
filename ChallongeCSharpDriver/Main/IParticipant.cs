@@ -5,9 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace ChallongeCSharpDriver.Main {
-    public interface IStartedTournament : ITournament
-    {
-        Task<int> remainingUncompletedMatches { get; }
-        Task<IOpenMatch> getNextMatch();
+    public interface IParticipant {
+        string name { get; }
     }
 }

@@ -5,26 +5,31 @@ using System.Text;
 using System.Threading.Tasks;
 using ChallongeCSharpDriver.Caller;
 using ChallongeCSharpDriver.Main;
+using ChallongeCSharpDriver.Main.Objects;
 
 namespace ChallongeDiscordBot
 {
     public class ChallongeDataLoader
     {
-        private Tournaments tournaments { get; }
+        private Tournaments Tournaments { get; }
+        private DateTime CreatedAfterDate { get; }
+
         public ChallongeDataLoader(string apiKey, string subdomain, DateTime createdAfterDate)
         {
             var config = new ChallongeConfig(apiKey);
             var caller = new ChallongeHTTPClientAPICaller(config);
-            tournaments = new Tournaments(caller, subdomain);
-
-            var res = tournaments.GetTournamentsCreatedAfter(createdAfterDate);
-            
+            Tournaments = new Tournaments(caller, subdomain);
+            CreatedAfterDate = createdAfterDate;
         }
 
         public async void LoadNewestData()
         {
             
-            await tournaments.getTournament("CSGO");
+        }
+
+        public async Task<TournamentObject> LoadTournament(string link)
+        {
+            return await Tournaments.getTournament(link);
         }
     }
 }

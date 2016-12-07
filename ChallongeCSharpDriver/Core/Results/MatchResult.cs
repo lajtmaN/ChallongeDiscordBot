@@ -14,5 +14,7 @@ namespace ChallongeCSharpDriver.Core.Results {
         public Nullable<int> winner_id { get; set; }
         public Nullable<int> loser_id { get; set; }
         public string state;
+        public DateTime started_at { get; set; }
+        public string location { get; set; }
     }
 }

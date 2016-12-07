@@ -5,7 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace ChallongeCSharpDriver.Main {
-    public interface Participant {
-        string name { get; }
+    public interface IClosedMatch
+    {
+        Task<IParticipant> winner { get; }
+        Task<IParticipant> loser { get; }
+        IOpenMatch reopen();
     }
 }

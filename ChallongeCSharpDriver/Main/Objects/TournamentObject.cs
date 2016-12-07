@@ -11,7 +11,8 @@ using ChallongeCSharpDriver.Core.Results;
 
 namespace ChallongeCSharpDriver.Main.Objects {
 
-    public class TournamentObject : IStartedTournament, IPendingTournament {
+    public class TournamentObject : IStartedTournament, IPendingTournament
+    {
         private ChallongeAPICaller caller;
         private TournamentResult result;
         public Task<int> remainingUncompletedMatches => getNumberOfUncompletedMatches();
@@ -34,13 +35,19 @@ namespace ChallongeCSharpDriver.Main.Objects {
             return this;
         }
 
-        public async Task<OpenMatch> getNextMatch() {
-            List<MatchResult> matches = await new MatchesQuery(result.id) { matchState = MatchState.Open }.call(caller);
+        public async Task<IOpenMatch> getNextMatch() {
+            List<MatchResult> matches = await new MatchesQuery(TournamentID) { matchState = MatchState.Open }.call(caller);
             if (matches.Count >= 0) {
                 return new MatchObject(matches[0], caller);
             } else {
                 throw new NoNextMatchAvailable();
             }
+        }
+
+        public async Task<List<IOpenMatch>> GetAllOpenMatches()
+        {
+            var list = await new MatchesQuery(TournamentID) {matchState = MatchState.Open }.call(caller);
+            return list.Select(r => new MatchObject(r, caller)).Cast<IOpenMatch>().ToList();
         }
 
         private async Task<int> getNumberOfUncompletedMatches() {
@@ -61,6 +68,7 @@ namespace ChallongeCSharpDriver.Main.Objects {
             }
         }
 
+        public int TournamentID => result.id;
         public string URL => result.url;
         public string Name => result.name;
         public string Description => result.description;

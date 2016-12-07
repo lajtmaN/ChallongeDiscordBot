@@ -8,6 +8,8 @@ namespace ChallongeCSharpDriver.Main
 {
     public interface ITournament
     {
+        int TournamentID { get; }
+
         TournamentState State { get; }
 
         string URL { get; }

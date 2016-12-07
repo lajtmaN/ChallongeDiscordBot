@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace ChallongeCSharpDriver.Main.Objects {
     using ChallongeCSharpDriver.Core.Results;
 
-    public class ParticipantObject : Participant {
+    public class ParticipantObject : IParticipant {
         private ParticipantResult result;
         public string name {
             get {

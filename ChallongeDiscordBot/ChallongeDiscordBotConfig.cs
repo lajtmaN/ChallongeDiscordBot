@@ -39,7 +39,7 @@ namespace ChallongeDiscordBot
         [ConfigurationProperty("ApiKey", IsRequired = true)]
         public string ApiKey => (string)this["ApiKey"];
 
-        [ConfigurationProperty("subdomain", IsRequired = true)]
+        [ConfigurationProperty("subdomain")]
         public string Subdomain => (string)this["subdomain"];
 
         /// <summary>

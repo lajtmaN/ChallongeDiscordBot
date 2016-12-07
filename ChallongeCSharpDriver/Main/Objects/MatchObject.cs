@@ -9,36 +9,19 @@ namespace ChallongeCSharpDriver.Main.Objects {
     using ChallongeCSharpDriver.Core.Queries;
     using ChallongeCSharpDriver.Core.Results;
 
-    public class MatchObject : OpenMatch, ClosedMatch {
+    public class MatchObject : IOpenMatch, IClosedMatch {
         private ChallongeAPICaller caller;
         private MatchResult result;
         private UpdateMatchQuery updateMatchQuery;
         private MatchState matchState;
-        public Task<Participant> player1 {
-            get {
-                return getPlayer(result.player1_id);
-            }
-        }
-        public Task<Participant> player2 {
-            get {
-                return getPlayer(result.player2_id);
-            }
-        }
-        public Task<Participant> winner {
-            get {
-                return getPlayer(result.winner_id);
-            }
-        }
-        public Task<Participant> loser {
-            get {
-                return getPlayer(result.loser_id);
-            }
-        }
-        public MatchState state {
-            get {
-                return matchState;
-            }
-        }
+        public Task<IParticipant> player1 => getPlayer(result.player1_id);
+        public Task<IParticipant> player2 => getPlayer(result.player2_id);
+        public string Location => result.location;
+        public Task<IParticipant> winner => getPlayer(result.winner_id);
+        public Task<IParticipant> loser => getPlayer(result.loser_id);
+        public MatchState state => matchState;
+        public DateTime StartedAt => result.started_at;
+
 
         public MatchObject(MatchResult result, ChallongeAPICaller caller) {
             this.result = result;
@@ -59,7 +42,7 @@ namespace ChallongeCSharpDriver.Main.Objects {
             updateMatchQuery = new UpdateMatchQuery(result);
         }
 
-        private async Task<Participant> getPlayer(Nullable<int> playerID) {
+        private async Task<IParticipant> getPlayer(int? playerID) {
             if (playerID.HasValue) {
                 ParticipantResult participantResult = await new ParticipantQuery(result.tournament_id, playerID.Value).call(caller);
                 return new ParticipantObject(participantResult);
@@ -76,12 +59,13 @@ namespace ChallongeCSharpDriver.Main.Objects {
             this.result = await updateMatchQuery.call(caller);
         }
 
-        public async Task<ClosedMatch> close() {
+
+        public async Task<IClosedMatch> close() {
             await update();
             return this;
         }
 
-        public OpenMatch reopen() {
+        public IOpenMatch reopen() {
             return this;
         }
 
