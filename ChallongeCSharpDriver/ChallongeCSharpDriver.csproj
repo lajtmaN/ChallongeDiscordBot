@@ -1,0 +1,124 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{CEE78D32-C564-4BC1-8E0A-28BDE3BB1763}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>ChallongeCSharpDriver</RootNamespace>
+    <AssemblyName>ChallongeCSharpDriver</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>Library\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Net" />
+    <Reference Include="System.Net.Http">
+      <HintPath>..\packages\System.Net.Http.2.0.20126.16343\lib\net40\System.Net.Http.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Net.Http.Extensions, Version=2.2.29.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Net.Http.Formatting.Extension.5.2.3.0\lib\System.Net.Http.Extensions.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Net.Http.Formatting, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Net.Http.Formatting.Extension.5.2.3.0\lib\System.Net.Http.Formatting.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Net.Http.Primitives, Version=4.2.29.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Net.Http.Formatting.Extension.5.2.3.0\lib\System.Net.Http.Primitives.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Net.Http.WebRequest">
+      <HintPath>..\packages\System.Net.Http.2.0.20126.16343\lib\net40\System.Net.Http.WebRequest.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Caller\ChallongeConfig.cs" />
+    <Compile Include="Core\ChallongeQueryParameters.cs" />
+    <Compile Include="Core\Objects\ParticipantEntry.cs" />
+    <Compile Include="Core\Queries\AddParticipantQuery.cs" />
+    <Compile Include="Core\Queries\CreateTournamentQuery.cs" />
+    <Compile Include="Core\Queries\DeleteTournamentQuery.cs" />
+    <Compile Include="Core\Queries\StartTournamentQuery.cs" />
+    <Compile Include="Main\ClosedMatch.cs" />
+    <Compile Include="Main\PendingTournament.cs" />
+    <Compile Include="Main\TournamentCreator.cs" />
+    <Compile Include="Score.cs" />
+    <Compile Include="Core\Queries\TournamentQuery.cs" />
+    <Compile Include="Core\Queries\ParticipantQuery.cs" />
+    <Compile Include="Core\Queries\UpdateMatchQuery.cs" />
+    <Compile Include="Core\Results\ParticipantResult.cs" />
+    <Compile Include="Core\ChallongeAPICaller.cs" />
+    <Compile Include="Main\Exceptions\InvalidMatchState.cs" />
+    <Compile Include="Main\Exceptions\NoNextMatchAvailable.cs" />
+    <Compile Include="Main\OpenMatch.cs" />
+    <Compile Include="Main\Objects\MatchObject.cs" />
+    <Compile Include="Core\Queries\ChallongeQuery.cs" />
+    <Compile Include="Core\Results\MatchResult.cs" />
+    <Compile Include="Main\Participant.cs" />
+    <Compile Include="Main\Exceptions\ParticipantNotAssigned.cs" />
+    <Compile Include="Main\Objects\ParticipantObject.cs" />
+    <Compile Include="Main\StartedTournament.cs" />
+    <Compile Include="Main\Tournaments.cs" />
+    <Compile Include="MatchState.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Caller\ChallongeHTTPClientAPICaller.cs" />
+    <Compile Include="Core\Queries\MatchesQuery.cs" />
+    <Compile Include="Core\Queries\TournamentsQuery.cs" />
+    <Compile Include="Core\Results\TournamentResult.cs" />
+    <Compile Include="Main\Objects\TournamentObject.cs" />
+    <Compile Include="TournamentState.cs" />
+    <Compile Include="TournamentType.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\LightweightHTTPAPICaller\LightweightHTTPAPICaller.csproj">
+      <Project>{955c76c8-2532-4ef0-836a-d0c5dbe219b0}</Project>
+      <Name>LightweightHTTPAPICaller</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
