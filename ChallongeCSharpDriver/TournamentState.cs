@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ChallongeCSharpDriver {
     public enum TournamentState {
-        All, Pending, InProgress, Ended
+        All, Pending, In_Progress, Complete, Awaiting_Review
     }
 
     public class TournamentStateParser {
@@ -16,10 +16,12 @@ namespace ChallongeCSharpDriver {
                     return "all";
                 case TournamentState.Pending:
                     return "pending";
-                case TournamentState.InProgress:
+                case TournamentState.In_Progress:
                     return "in_progress";
-                case TournamentState.Ended:
-                    return "ended";
+                case TournamentState.Complete:
+                    return "complete";
+                case TournamentState.Awaiting_Review:
+                    return "awaiting_review";
                 default:
                     throw new NotSupportedException();
             }

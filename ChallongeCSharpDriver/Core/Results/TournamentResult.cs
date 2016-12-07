@@ -12,5 +12,6 @@ namespace ChallongeCSharpDriver.Core.Results {
         public string url { get; set; }
         public string description { get; set; }
         public string tournament_type { get; set; }
+        public string state { get; set; }
     }
 }

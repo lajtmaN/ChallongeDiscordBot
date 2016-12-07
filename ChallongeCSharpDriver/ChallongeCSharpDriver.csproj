@@ -75,7 +75,8 @@
     <Compile Include="Core\Queries\DeleteTournamentQuery.cs" />
     <Compile Include="Core\Queries\StartTournamentQuery.cs" />
     <Compile Include="Main\ClosedMatch.cs" />
-    <Compile Include="Main\PendingTournament.cs" />
+    <Compile Include="Main\IPendingTournament.cs" />
+    <Compile Include="Main\ITournament.cs" />
     <Compile Include="Main\TournamentCreator.cs" />
     <Compile Include="Score.cs" />
     <Compile Include="Core\Queries\TournamentQuery.cs" />
@@ -92,7 +93,7 @@
     <Compile Include="Main\Participant.cs" />
     <Compile Include="Main\Exceptions\ParticipantNotAssigned.cs" />
     <Compile Include="Main\Objects\ParticipantObject.cs" />
-    <Compile Include="Main\StartedTournament.cs" />
+    <Compile Include="Main\IStartedTournament.cs" />
     <Compile Include="Main\Tournaments.cs" />
     <Compile Include="MatchState.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

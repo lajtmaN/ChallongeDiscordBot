@@ -16,7 +16,7 @@ namespace ChallongeCSharpDriver.Main {
             this.caller = caller;
         }
 
-        public async Task<PendingTournament> create(string name, TournamentType type, string url) {
+        public async Task<IPendingTournament> create(string name, TournamentType type, string url) {
             TournamentResult result = await new CreateTournamentQuery(name, type, url).call(caller);
             return new TournamentObject(result, caller);
         }

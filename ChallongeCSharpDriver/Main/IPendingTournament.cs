@@ -5,8 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace ChallongeCSharpDriver.Main {
-    public interface PendingTournament {
+    public interface IPendingTournament : ITournament
+    {
         Task AddParticipant(String participant);
-        Task<StartedTournament> StartTournament();
+        Task<IStartedTournament> StartTournament();
     }
 }

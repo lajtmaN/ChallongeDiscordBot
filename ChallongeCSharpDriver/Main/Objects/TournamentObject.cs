@@ -3,21 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ChallongeCSharpDriver.Core;
+using ChallongeCSharpDriver.Core.Objects;
+using ChallongeCSharpDriver.Core.Queries;
+using ChallongeCSharpDriver.Core.Results;
+
 
 namespace ChallongeCSharpDriver.Main.Objects {
-    using ChallongeCSharpDriver.Core;
-    using ChallongeCSharpDriver.Core.Objects;
-    using ChallongeCSharpDriver.Core.Queries;
-    using ChallongeCSharpDriver.Core.Results;
 
-    public class TournamentObject : StartedTournament, PendingTournament {
+    public class TournamentObject : IStartedTournament, IPendingTournament {
         private ChallongeAPICaller caller;
         private TournamentResult result;
-        public Task<int> remainingUncompletedMatches {
-            get {
-                return getNumberOfUncompletedMatches();
-            }
-        }
+        public Task<int> remainingUncompletedMatches => getNumberOfUncompletedMatches();
 
         public TournamentObject(TournamentResult result, ChallongeAPICaller caller) {
             this.result = result;
@@ -32,7 +29,7 @@ namespace ChallongeCSharpDriver.Main.Objects {
             await new AddParticipantQuery(result.id, new ParticipantEntry(participant)).call(caller);
         }
 
-        public async Task<StartedTournament> StartTournament() {
+        public async Task<IStartedTournament> StartTournament() {
             await new StartTournamentQuery(result.id).call(caller);
             return this;
         }
@@ -50,5 +47,22 @@ namespace ChallongeCSharpDriver.Main.Objects {
             List<MatchResult> matches = await new MatchesQuery(result.id).call(caller);
             return matches.Select(match => match.state != "completed").Count();
         }
+
+        public TournamentState State
+        {
+            get
+            {
+                TournamentState res;
+                if (Enum.TryParse(result.state, true, out res))
+                {
+                    return res;
+                }
+                throw new NotSupportedException(result.state + " was not recognized");
+            }
+        }
+
+        public string URL => result.url;
+        public string Name => result.name;
+        public string Description => result.description;
     }
 }
