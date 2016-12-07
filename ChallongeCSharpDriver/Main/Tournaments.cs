@@ -1,4 +1,6 @@
 ﻿
+using System.Linq;
+
 namespace ChallongeCSharpDriver.Main {
     using System;
     using System.Collections.Generic;
@@ -20,6 +22,7 @@ namespace ChallongeCSharpDriver.Main {
 
         public async Task<List<StartedTournament>> getStartedTournaments() {
             List<TournamentResult> tournamentResultList = await new TournamentsQuery() {
+                Subdomain = TournamentSubdomain,
                 state = TournamentState.InProgress
             }
             .call(caller);
@@ -28,6 +31,17 @@ namespace ChallongeCSharpDriver.Main {
                 tournamentList.Add(new TournamentObject(result, caller));
             }
             return tournamentList;
+        }
+
+        public async Task<List<StartedTournament>> GetTournamentsCreatedAfter(DateTime date)
+        {
+            List<TournamentResult> tournamentResultList = await new TournamentsQuery
+            {
+                Subdomain = TournamentSubdomain,
+                created_after = date
+            }.call(caller);
+
+            return tournamentResultList.Select(result => new TournamentObject(result, caller)).Cast<StartedTournament>().ToList();
         }
 
         public async Task<TournamentObject> getTournament(string tournamentID) {

@@ -27,7 +27,7 @@ namespace ChallongeCSharpDriver.Core.Queries {
 
         private string getAPIPath()
         {
-            string prefix = !string.IsNullOrWhiteSpace(subdomain) ? "-" + subdomain : "";
+            string prefix = !string.IsNullOrWhiteSpace(subdomain) ? subdomain + "-" : "";
             return $"tournaments/{prefix}{tournamentID}";
         }
 

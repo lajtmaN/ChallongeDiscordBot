@@ -1,4 +1,5 @@
-﻿using System.Configuration;
+﻿using System;
+using System.Configuration;
 
 namespace ChallongeDiscordBot
 {
@@ -40,5 +41,22 @@ namespace ChallongeDiscordBot
 
         [ConfigurationProperty("subdomain", IsRequired = true)]
         public string Subdomain => (string)this["subdomain"];
+
+        /// <summary>
+        /// Only fetch tournaments after this date.
+        /// Can be left empty - defaults to 90 days ago
+        /// </summary>
+        [ConfigurationProperty("created_after")]
+        public DateTime CreatedAfter
+        {
+            get
+            {
+                DateTime customDate = (DateTime)this["created_after"];
+                
+                return customDate.Ticks > 0
+                    ? customDate
+                    : DateTime.Now.Subtract(TimeSpan.FromDays(90));
+            }
+        } 
     }
 }

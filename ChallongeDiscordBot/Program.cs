@@ -15,7 +15,7 @@ namespace ChallongeDiscordBot
             foreach (ChallongeDiscordBotConfig bot in config.Instances)
             {
                 Console.WriteLine($"Creating bot for: {bot.Name} using ApiKey: {bot.ApiKey}");
-                new ChallongeDataLoader(bot.ApiKey).LoadNewestData();
+                new ChallongeDataLoader(bot.ApiKey, bot.Subdomain, bot.CreatedAfter).LoadNewestData();
             }
             Console.ReadLine();
 
