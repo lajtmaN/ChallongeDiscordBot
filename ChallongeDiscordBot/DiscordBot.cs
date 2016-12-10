@@ -5,38 +5,68 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Discord;
+using Discord.Legacy;
 
 namespace ChallongeDiscordBot
 {
     public class DiscordBot
     {
         private const string BOT_PREFIX = "nnpbot";
-        private DiscordClient bot;
+        private DiscordClient Bot { get; }
+        private Profile BotProfile { get; set; } 
+
+        private Dictionary<string, Channel> Channels;
+        private Channel DefaultChannel { get; set; }
+
         private string discordToken { get; }
 
         public DiscordBot(ChallongeDiscordBotConfig config)
         {
+            Channels = new Dictionary<string, Channel>();
             discordToken = config.DiscordToken;
-            bot = new DiscordClient();
+            Bot = new DiscordClient();
 
             AttachEvents();
         }
 
         private void AttachEvents()
         {
-            bot.Ready += (s, a) => Console.WriteLine("Discord Bot: '" + (s as DiscordClient)?.CurrentUser.Name + "' is ready");
-            bot.MessageReceived += ClientOnMessageReceived;
+            Bot.Ready += BotOnReady;
+            Bot.ServerAvailable += BotOnJoinedServer;
+            Bot.JoinedServer += BotOnJoinedServer;
+            Bot.MessageReceived += ClientOnMessageReceived;
+        }
+
+        private void BotOnJoinedServer(object sender, ServerEventArgs newServer)
+        {
+            Console.WriteLine($"{BotProfile?.Name} joined {newServer.Server.Name}");
+            foreach (Channel chan in newServer.Server.TextChannels)
+            {
+                Channels.Add(chan.Name.ToLower(), chan);
+                Console.WriteLine($"Channel {chan.Name} registered");
+            }
+
+            //DefaultChannel = newServer.Server.DefaultChannel;
+            DefaultChannel = newServer.Server.TextChannels.First(x => x.Name == "test");
+
+            SendMessage($"{BotProfile?.Name} is ready for duty", DefaultChannel);
+        }
+
+        private void BotOnReady(object sender, EventArgs eventArgs)
+        {
+            BotProfile = (sender as DiscordClient)?.CurrentUser;
+            Console.WriteLine("Discord Bot: '" + BotProfile?.Name + "' is ready");
         }
 
         public void StartDiscordBotThread()
         {
-             /*new Task(() =>
+             new Task(() =>
              {
-                 bot.ExecuteAndWait(async () =>
+                 Bot.ExecuteAndWait(async () =>
                  {
-                     await bot.Connect(discordToken, TokenType.Bot);
+                     await Bot.Connect(discordToken, TokenType.Bot);
                  });
-             }).Start();*/
+             }).Start();
         }
 
         private static async void ClientOnMessageReceived(object sender, MessageEventArgs messageEventArgs)
@@ -57,15 +87,27 @@ namespace ChallongeDiscordBot
             }
         }
 
+        public void SendMessageInDefaultChannel(string rawMessage)
+        {
+            SendMessage(rawMessage, DefaultChannel);
+        }
 
         public void SendMessage(string rawMessage, string channel)
         {
-            
+            channel = channel.ToLower();
+
+            if (Channels.ContainsKey(channel))
+                SendMessage(rawMessage, Channels[channel]);
         }
 
-        public static bool MessageIsForMe(MessageEventArgs input, out string userMessage)
+        private void SendMessage(string rawMessage, Channel channel)
         {
-            userMessage = String.Empty;
+            channel.SendMessage(rawMessage);
+        }
+
+        private static bool MessageIsForMe(MessageEventArgs input, out string userMessage)
+        {
+            userMessage = string.Empty;
 
             if (input.Message.IsAuthor) //Did i send the message?
                 return false;
