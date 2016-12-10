@@ -25,8 +25,8 @@ namespace ChallongeDiscordBot
         }
 
         public event OnNewMatchStartedEvent OnNewMatchStarted;
-
-
+        public event OnTournamentStartedEvent OnTournamentStarted;
+        
         public void StartLoaderThread()
         {
             LoaderTimer = new Timer(e => test1(), null, TimeSpan.Zero, TimeSpan.FromSeconds(UPDATE_RATE_SECONDS));
@@ -41,8 +41,18 @@ namespace ChallongeDiscordBot
                 OnNewMatchStarted?.Invoke(this, new OnNewMatchStartedArgs(match, tournament));
         }
     }
-
+    
     public delegate void OnNewMatchStartedEvent(object sender, OnNewMatchStartedArgs args);
+    public delegate void OnTournamentStartedEvent(object sender, OnTournamentStartedEventArgs args);
+
+    public class OnTournamentStartedEventArgs
+    {
+        public OnTournamentStartedEventArgs(IStartedTournament tournament)
+        {
+            Tournament = tournament;
+        }
+        public IStartedTournament Tournament { get; }
+    }
 
     public class OnNewMatchStartedArgs : EventArgs
     {

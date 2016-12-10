@@ -17,6 +17,7 @@ namespace ChallongeDiscordBot
 
         private Dictionary<string, Channel> Channels;
         private Channel DefaultChannel { get; set; }
+        private Server Server { get; set; }
 
         private string discordToken { get; }
 
@@ -40,6 +41,8 @@ namespace ChallongeDiscordBot
         private void BotOnJoinedServer(object sender, ServerEventArgs newServer)
         {
             Console.WriteLine($"{BotProfile?.Name} joined {newServer.Server.Name}");
+            Server = newServer.Server; 
+
             foreach (Channel chan in newServer.Server.TextChannels)
             {
                 Channels.Add(chan.Name.ToLower(), chan);
@@ -50,6 +53,10 @@ namespace ChallongeDiscordBot
             DefaultChannel = newServer.Server.TextChannels.First(x => x.Name == "test");
 
             SendMessage($"{BotProfile?.Name} is ready for duty", DefaultChannel);
+
+            //Unsubscribe for event. Only ONE server!
+            Bot.ServerAvailable -= BotOnJoinedServer;
+            Bot.JoinedServer -= BotOnJoinedServer;
         }
 
         private void BotOnReady(object sender, EventArgs eventArgs)
@@ -100,9 +107,17 @@ namespace ChallongeDiscordBot
                 SendMessage(rawMessage, Channels[channel]);
         }
 
-        private void SendMessage(string rawMessage, Channel channel)
+        private async void SendMessage(string rawMessage, Channel channel)
         {
-            channel.SendMessage(rawMessage);
+            await channel.SendMessage(rawMessage);
+        }
+
+        public async Task<bool> CreateChannel(string channelName)
+        {
+            if (Channels.ContainsKey(channelName))
+                return true;
+
+            return await Server.CreateChannel(channelName, ChannelType.Text) != null;
         }
 
         private static bool MessageIsForMe(MessageEventArgs input, out string userMessage)

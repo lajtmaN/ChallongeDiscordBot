@@ -27,8 +27,15 @@ namespace ChallongeDiscordBot
         private void AttachEvents()
         {
             ChallongeClient.OnNewMatchStarted += OnOnNewMatchStarted;
+            ChallongeClient.OnTournamentStarted += ChallongeClientOnOnTournamentStarted;
         }
 
+        private async void ChallongeClientOnOnTournamentStarted(object sender, OnTournamentStartedEventArgs args)
+        {
+            string channelName = args.Tournament.URL;
+            bool channelExist = await DiscordBot.CreateChannel(channelName);
+            DiscordBot.SendMessage($"{args.Tournament.Name} konkurrencen er nu startet...{Environment.NewLine}Hold dig venligst opdateret i denne kanal hvis du deltager i turneringen.", channelName);
+        }
 
         private async void OnOnNewMatchStarted(object sender, OnNewMatchStartedArgs args)
         {
