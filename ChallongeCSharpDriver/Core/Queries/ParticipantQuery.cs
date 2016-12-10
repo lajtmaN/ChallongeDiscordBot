@@ -9,10 +9,10 @@ namespace ChallongeCSharpDriver.Core.Queries {
     using ChallongeCSharpDriver.Caller;
 
     public class ParticipantQuery : ChallongeQuery<ParticipantResult> {
-        public int tournamentID { get; set; }
+        public string tournamentID { get; set; }
         public int participantID { get; set; }
 
-        public ParticipantQuery(int tournamentID, int participantID) {
+        public ParticipantQuery(string tournamentID, int participantID) {
             this.tournamentID = tournamentID;
             this.participantID = participantID;
         }
@@ -26,12 +26,13 @@ namespace ChallongeCSharpDriver.Core.Queries {
         }
 
         private string getAPIPath() {
-            return "tournaments/" + tournamentID + "/participants/" + participantID;
+            //return "tournaments/" + tournamentID + "/participants/" + participantID; //TODO Does not work in group stage tournaments
+            return "tournaments/" + tournamentID + "/participants";
         }
 
         public async Task<ParticipantResult> call(ChallongeAPICaller caller) {
-            ParticipantQueryResult participantResult = await caller.GET<ParticipantQueryResult>(getAPIPath(), getParameters());
-            return participantResult.participant;
+            List<ParticipantQueryResult> participantResults = await caller.GET<List<ParticipantQueryResult>>(getAPIPath(), getParameters());
+            return participantResults.First(x => x.participant.id == participantID || x.participant.group_player_ids.Contains(participantID))?.participant;
         }
     }
 }

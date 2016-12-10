@@ -57,6 +57,9 @@ namespace ChallongeDiscordBot
                     ? customDate
                     : DateTime.Now.Subtract(TimeSpan.FromDays(90));
             }
-        } 
+        }
+
+        [ConfigurationProperty("DiscordToken", IsRequired = true)]
+        public string DiscordToken => (string)this["DiscordToken"];
     }
 }

@@ -10,6 +10,8 @@ namespace ChallongeCSharpDriver.Main {
         void addScore(Score score);
         Task update();
         DateTime StartedAt { get; }
+        DateTime? MarkedAsActive { get; }
+        bool MatchMarkedAsActive { get; }
         Task<IClosedMatch> close();
     }
 }

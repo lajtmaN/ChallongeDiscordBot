@@ -9,10 +9,13 @@ namespace ChallongeCSharpDriver.Main
     public interface ITournament
     {
         int TournamentID { get; }
+        string TournamentSubdomainID { get; }
 
         TournamentState State { get; }
 
         string URL { get; }
+
+        string SubDomain { get; }
 
         string Name { get; }
 

@@ -31,13 +31,13 @@ namespace ChallongeCSharpDriver.Main.Objects {
         }
 
         public async Task<IStartedTournament> StartTournament() {
-            await new StartTournamentQuery(result.id).call(caller);
+            await new StartTournamentQuery(TournamentSubdomainID).call(caller);
             return this;
         }
 
         public async Task<IOpenMatch> getNextMatch() {
-            List<MatchResult> matches = await new MatchesQuery(TournamentID) { matchState = MatchState.Open }.call(caller);
-            if (matches.Count >= 0) {
+            List<MatchResult> matches = await new MatchesQuery(TournamentSubdomainID) { matchState = MatchState.Open }.call(caller);
+            if (matches.Count > 0) {
                 return new MatchObject(matches[0], caller);
             } else {
                 throw new NoNextMatchAvailable();
@@ -46,14 +46,22 @@ namespace ChallongeCSharpDriver.Main.Objects {
 
         public async Task<List<IOpenMatch>> GetAllOpenMatches()
         {
-            var list = await new MatchesQuery(TournamentID) {matchState = MatchState.Open }.call(caller);
+            var list = await new MatchesQuery(TournamentSubdomainID) {matchState = MatchState.Open }.call(caller);
             return list.Select(r => new MatchObject(r, caller)).Cast<IOpenMatch>().ToList();
         }
 
+        public async Task<List<IOpenMatch>> GetAllActiveMatches()
+        {
+            var openMatches = await GetAllOpenMatches();
+            return openMatches.Where(x => x.MatchMarkedAsActive).ToList();
+        }
+        
         private async Task<int> getNumberOfUncompletedMatches() {
-            List<MatchResult> matches = await new MatchesQuery(result.id).call(caller);
+            List<MatchResult> matches = await new MatchesQuery(TournamentSubdomainID).call(caller);
             return matches.Select(match => match.state != "completed").Count();
         }
+
+        public string TournamentSubdomainID => string.IsNullOrWhiteSpace(SubDomain) ? TournamentID.ToString() : $"{SubDomain}-{URL}";
 
         public TournamentState State
         {
@@ -70,6 +78,7 @@ namespace ChallongeCSharpDriver.Main.Objects {
 
         public int TournamentID => result.id;
         public string URL => result.url;
+        public string SubDomain => result.subdomain;
         public string Name => result.name;
         public string Description => result.description;
     }

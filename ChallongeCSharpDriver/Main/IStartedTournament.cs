@@ -9,5 +9,7 @@ namespace ChallongeCSharpDriver.Main {
     {
         Task<int> remainingUncompletedMatches { get; }
         Task<IOpenMatch> getNextMatch();
+        Task<List<IOpenMatch>> GetAllOpenMatches();
+        Task<List<IOpenMatch>> GetAllActiveMatches();
     }
 }

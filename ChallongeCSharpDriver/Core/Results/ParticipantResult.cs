@@ -9,5 +9,6 @@ namespace ChallongeCSharpDriver.Core.Results {
         public int id { get; set; }
         public string name { get; set; }
         public string active { get; set; }
+        public List<int> group_player_ids { get; set; }
     }
 }

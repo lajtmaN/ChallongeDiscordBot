@@ -8,6 +8,7 @@ namespace ChallongeCSharpDriver.Core.Results {
     public class MatchResult {
         public int id { get; set; }
         public int tournament_id { get; set; }
+        public string tournament_subdomain_id { get; set; }
         public string identifier { get; set; }
         public Nullable<int> player1_id { get; set; }
         public Nullable<int> player2_id { get; set; }
@@ -16,5 +17,6 @@ namespace ChallongeCSharpDriver.Core.Results {
         public string state;
         public DateTime started_at { get; set; }
         public string location { get; set; }
+        public DateTime? underway_at { get; set; }
     }
 }

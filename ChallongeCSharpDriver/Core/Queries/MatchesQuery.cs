@@ -9,7 +9,7 @@ namespace ChallongeCSharpDriver.Core.Queries {
     using ChallongeCSharpDriver.Main;
 
     public class MatchesQuery : ChallongeQuery<List<MatchResult>> {
-        public int tournamentID { get; set; }
+        public string tournamentID { get; set; }
         public Nullable<MatchState> matchState { get; set; }
         public Nullable<int> participantID { get; set; }
 
@@ -17,7 +17,7 @@ namespace ChallongeCSharpDriver.Core.Queries {
             public MatchResult match { get; set; }
         }
 
-        public MatchesQuery(int tournamentID) {
+        public MatchesQuery(string tournamentID) {
             this.tournamentID = tournamentID;
         }
 
@@ -50,7 +50,9 @@ namespace ChallongeCSharpDriver.Core.Queries {
         public async Task<List<MatchResult>> call(ChallongeAPICaller caller) {
             List<MatchesQueryResult> matchesQueryResult = await caller.GET<List<MatchesQueryResult>>(getAPIPath(), getParameters());
             List<MatchResult> matches = new List<MatchResult>();
-            foreach (MatchesQueryResult queryResult in matchesQueryResult) {
+            foreach (MatchesQueryResult queryResult in matchesQueryResult)
+            {
+                queryResult.match.tournament_subdomain_id = tournamentID; //hack to add subdomain to matches
                 matches.Add(queryResult.match);
             }
             return matches;

@@ -9,9 +9,9 @@ namespace ChallongeCSharpDriver.Core.Queries {
     using ChallongeCSharpDriver.Core.Results;
 
     public class StartTournamentQuery : ChallongeQuery<bool> {
-        public int tournamentID { get; set; }
+        public string tournamentID { get; set; }
 
-        public StartTournamentQuery(int tournamentID) {
+        public StartTournamentQuery(string tournamentID) {
             this.tournamentID = tournamentID;
         }
 

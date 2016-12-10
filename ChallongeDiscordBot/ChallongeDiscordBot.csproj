@@ -108,8 +108,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChallongeClient.cs" />
     <Compile Include="ChallongeDataLoader.cs" />
+    <Compile Include="ChallongeDiscordBot.cs" />
     <Compile Include="ChallongeDiscordBotConfig.cs" />
+    <Compile Include="DiscordBot.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
