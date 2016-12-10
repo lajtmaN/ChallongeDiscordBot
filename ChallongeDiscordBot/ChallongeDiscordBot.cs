@@ -10,8 +10,8 @@ namespace ChallongeDiscordBot
 {
     public class ChallongeDiscordBot
     {
-        private DiscordBot DiscordBot { get; set; }
-        private ChallongeClient ChallongeClient { get; set; }
+        private DiscordBot DiscordBot { get; }
+        private ChallongeClient ChallongeClient { get; }
 
         public ChallongeDiscordBot(ChallongeDiscordBotConfig config)
         {
@@ -30,12 +30,13 @@ namespace ChallongeDiscordBot
         }
 
 
-        private static async void OnOnNewMatchStarted(object sender, OnNewMatchStartedArgs args)
+        private async void OnOnNewMatchStarted(object sender, OnNewMatchStartedArgs args)
         {
             IParticipant team1 = await args.Match.player1;
             IParticipant team2 = await args.Match.player2;
 
-
+            string message = $"{team1.name} vs {team2.name}. Kampen er klar til at blive spillet. {Environment.NewLine}Server: {args.Match.Location}";
+            DiscordBot.SendMessage(message, args.Tournament.URL);
         }
     }
 }
