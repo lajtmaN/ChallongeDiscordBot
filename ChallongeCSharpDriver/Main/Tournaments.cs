@@ -20,10 +20,11 @@ namespace ChallongeCSharpDriver.Main {
             this.TournamentSubdomain = subdomain;
         }
 
-        public async Task<List<IStartedTournament>> getStartedTournaments() {
-            List<TournamentResult> tournamentResultList = await new TournamentsQuery() {
+        public async Task<List<IStartedTournament>> getStartedTournaments(DateTime? createdAfter = null) {
+            List<TournamentResult> tournamentResultList = await new TournamentsQuery {
                 Subdomain = TournamentSubdomain,
-                state = TournamentState.In_Progress
+                state = TournamentState.In_Progress,
+                created_after = createdAfter
             }
             .call(caller);
             List<IStartedTournament> tournamentList = new List<IStartedTournament>();

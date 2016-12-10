@@ -27,6 +27,11 @@ namespace ChallongeDiscordBot
             
         }
 
+        public async Task<IEnumerable<IStartedTournament>> GetStartedTournaments()
+        {
+            return await Tournaments.getStartedTournaments(CreatedAfterDate);
+        }
+
         public async Task<TournamentObject> LoadTournament(string link)
         {
             return await Tournaments.getTournament(link);

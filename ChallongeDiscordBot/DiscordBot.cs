@@ -16,7 +16,7 @@ namespace ChallongeDiscordBot
         private Profile BotProfile { get; set; } 
 
         private Dictionary<string, Channel> Channels;
-        private Channel DefaultChannel { get; set; }
+        private Channel DefaultChannel => Server.DefaultChannel;
         private Server Server { get; set; }
 
         private string discordToken { get; }
@@ -48,12 +48,7 @@ namespace ChallongeDiscordBot
                 Channels.Add(chan.Name.ToLower(), chan);
                 Console.WriteLine($"Channel {chan.Name} registered");
             }
-
-            //DefaultChannel = newServer.Server.DefaultChannel;
-            DefaultChannel = newServer.Server.TextChannels.First(x => x.Name == "test");
-
-            SendMessage($"{BotProfile?.Name} is ready for duty", DefaultChannel);
-
+            
             //Unsubscribe for event. Only ONE server!
             Bot.ServerAvailable -= BotOnJoinedServer;
             Bot.JoinedServer -= BotOnJoinedServer;

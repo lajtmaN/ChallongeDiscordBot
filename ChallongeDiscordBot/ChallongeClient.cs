@@ -12,7 +12,7 @@ namespace ChallongeDiscordBot
     public class ChallongeClient
     {
         private const int UPDATE_RATE_SECONDS = 30;
-
+        
         private ChallongeDataLoader Loader { get; }
         private Timer LoaderTimer { get; set; }
 
