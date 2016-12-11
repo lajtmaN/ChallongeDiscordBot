@@ -11,11 +11,11 @@ namespace ChallongeCSharpDriver.Main {
     using System.Threading.Tasks;
     using ChallongeCSharpDriver.Main.Objects;
 
-    public class Tournaments {
+    public class ChallongeTournaments {
         ChallongeAPICaller caller;
         private string TournamentSubdomain { get; }
 
-        public Tournaments(ChallongeAPICaller caller, string subdomain = "") {
+        public ChallongeTournaments(ChallongeAPICaller caller, string subdomain = "") {
             this.caller = caller;
             this.TournamentSubdomain = subdomain;
         }

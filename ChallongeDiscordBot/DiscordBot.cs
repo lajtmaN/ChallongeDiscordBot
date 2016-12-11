@@ -112,6 +112,8 @@ namespace ChallongeDiscordBot
 
         public async Task<bool> CreateChannel(string channelName)
         {
+            channelName = channelName.ToLower();
+
             if (Channels.ContainsKey(channelName))
                 return true;
 

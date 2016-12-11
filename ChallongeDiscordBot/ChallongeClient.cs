@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using ChallongeCSharpDriver.Caller;
+using ChallongeCSharpDriver.Core.Queries;
 using ChallongeCSharpDriver.Main;
 using ChallongeCSharpDriver.Main.Objects;
 using ChallongeDiscordBot.Entities;
@@ -13,9 +14,10 @@ namespace ChallongeDiscordBot
 {
     public class ChallongeClient
     {
-        private const int UPDATE_RATE_SECONDS = 10000;
+        private const int UPDATE_RATE_SECONDS = 30;
         private Timer LoaderTimer { get; }
-        private Tournaments Tournaments { get; }
+        private ChallongeTournaments ChallongeTournaments { get; }
+        private ChallongeMatches ChallongeMatches { get; }
         private DateTime CreatedAfterDate { get; }
 
         public DiscordChallongeDatabase Database { get; }
@@ -26,7 +28,9 @@ namespace ChallongeDiscordBot
         {
             var config = new ChallongeConfig(apiKey);
             var caller = new ChallongeHTTPClientAPICaller(config);
-            Tournaments = new Tournaments(caller, subdomain);
+            ChallongeTournaments = new ChallongeTournaments(caller, subdomain);
+            ChallongeMatches = new ChallongeMatches(caller);
+
             CreatedAfterDate = createdAfterDate;
             
             LoaderTimer = new Timer(e => LoadNewestData());
@@ -41,25 +45,28 @@ namespace ChallongeDiscordBot
             LoaderTimer.Change(TimeSpan.Zero, TimeSpan.FromSeconds(UPDATE_RATE_SECONDS));
         }
 
-
         /// <summary>
         /// Update DiscordChallengeDatabase with newest data
         /// </summary>
-        public async void LoadNewestData()
+        private async void LoadNewestData()
         {
             await LoadNewestTournaments();
             await LoadNewestParticipants();
             await LoadNewestMatches();
+
+            await AnnounceNewTournaments();
+            await AnnounceNewMatches();
         }
-        
+
         private async Task LoadNewestTournaments()
         {
-            var tournaments = await Tournaments.GetTournamentsCreatedAfter(CreatedAfterDate);
+            var tournaments = await ChallongeTournaments.GetTournamentsCreatedAfter(CreatedAfterDate);
             foreach (ITournament tournament in tournaments)
             {
                 if (await Database.Tournaments.FindAsync(tournament.TournamentID) == null)
                 {
                     Database.Tournaments.Add(Tournament.CreateTournament(tournament));
+                    Console.WriteLine($"New tournament added: {tournament.Name}");
                 }
             }
             await Database.SaveChangesAsync();
@@ -69,13 +76,14 @@ namespace ChallongeDiscordBot
         {
             foreach (var tourn in Database.Tournaments)
             {
-                var challongeTournament = await Tournaments.getTournament(tourn.ShortName);
+                var challongeTournament = await ChallongeTournaments.getTournament(tourn.ShortName);
                 var participants = await challongeTournament.GetParticipants();
                 foreach (var chalPart in participants)
                 {
                     if (await Database.Participants.FindAsync(chalPart.id.ID) == null)
                     {
                         Database.Participants.Add(Participant.CreateParticipant(chalPart));
+                        Console.WriteLine($"New participant added: {chalPart.name}");
                     }
                 }
             }
@@ -86,20 +94,48 @@ namespace ChallongeDiscordBot
         {
             foreach (var tourn in Database.Tournaments)
             {
-                var challongeTournament = await Tournaments.getTournament(tourn.ShortName);
+                var challongeTournament = await ChallongeTournaments.getTournament(tourn.ShortName);
                 var matches = await challongeTournament.GetAllActiveMatches();
                 foreach (var chalMatch in matches)
                 {
                     if (await Database.Matches.FindAsync(chalMatch.id) == null)
                     {
                         Database.Matches.Add(Match.CreateMatch(chalMatch));
+                        Console.WriteLine($"New match added: {chalMatch.id} for {challongeTournament.Name}");
                     }
                 }
             }
             await Database.SaveChangesAsync();
         }
-    }
 
+        private async Task AnnounceNewMatches()
+        {
+            foreach (var match in Database.Matches.Where(x => !x.Announced))
+            {
+                var challongeTournament = await ChallongeTournaments.getTournament(match.Tournament.ShortName);
+                var challongeMatch = await ChallongeMatches.GetMatch(match.Tournament.ChallongeIDWithSubdomain, match.ID);
+                var args = new OnNewMatchStartedArgs(challongeMatch, challongeTournament);
+                OnNewMatchStarted?.Invoke(this, args);
+
+                match.Announced = true;
+            }
+            await Database.SaveChangesAsync();
+        }
+
+        private async Task AnnounceNewTournaments()
+        {
+            foreach (var tourn in Database.Tournaments.Where(x => !x.Announced))
+            {
+                var challongeTournament = await ChallongeTournaments.getTournament(tourn.ShortName);
+                var args = new OnTournamentStartedEventArgs(challongeTournament);
+                OnTournamentStarted?.Invoke(this, args);
+
+                tourn.Announced = true;
+            }
+            await Database.SaveChangesAsync();
+        }
+    }
+    
     public delegate void OnNewMatchStartedEvent(object sender, OnNewMatchStartedArgs args);
     public delegate void OnTournamentStartedEvent(object sender, OnTournamentStartedEventArgs args);
 

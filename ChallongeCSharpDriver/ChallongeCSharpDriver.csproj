@@ -73,8 +73,10 @@
     <Compile Include="Core\Queries\AddParticipantQuery.cs" />
     <Compile Include="Core\Queries\CreateTournamentQuery.cs" />
     <Compile Include="Core\Queries\DeleteTournamentQuery.cs" />
+    <Compile Include="Core\Queries\MatchQuery.cs" />
     <Compile Include="Core\Queries\ParticipantsQuery.cs" />
     <Compile Include="Core\Queries\StartTournamentQuery.cs" />
+    <Compile Include="Main\ChallongeMatches.cs" />
     <Compile Include="Main\IClosedMatch.cs" />
     <Compile Include="Main\IPendingTournament.cs" />
     <Compile Include="Main\ITournament.cs" />
@@ -98,7 +100,7 @@
     <Compile Include="Main\Exceptions\ParticipantNotAssigned.cs" />
     <Compile Include="Main\Objects\ParticipantObject.cs" />
     <Compile Include="Main\IStartedTournament.cs" />
-    <Compile Include="Main\Tournaments.cs" />
+    <Compile Include="Main\ChallongeTournaments.cs" />
     <Compile Include="MatchState.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Caller\ChallongeHTTPClientAPICaller.cs" />

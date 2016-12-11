@@ -10,6 +10,8 @@ namespace ChallongeCSharpDriver.Main
 {
     public class ParticipantIDCache
     {
+        private ParticipantIDCache() { }
+
         private static ParticipantIDCache _me { get; } = new ParticipantIDCache();
 
         public static ParticipantIDCache Instance => _me;
