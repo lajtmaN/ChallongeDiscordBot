@@ -26,36 +26,28 @@ namespace ChallongeCSharpDriver.Core.Queries {
             return new ChallongeQueryParameters();
         }
 
-        private string getAPIPath() {
-            return "tournaments/" + tournamentID + "/participants/" + ParticipantID.ID;
-        }
-
-        private string getGroupStageApiPath()
+        private string getAPIPath(int? id)
         {
+            if (id.HasValue)
+                return "tournaments/" + tournamentID + "/participants/" + id.Value;
             return "tournaments/" + tournamentID + "/participants";
         }
 
         public async Task<ParticipantResult> call(ChallongeAPICaller caller) {
             //TODO: Implement some cache here please
 
-            if (ParticipantID.ID > 0)
+            int? id = ParticipantIDCache.Instance.GetParticipantID(ParticipantID);
+            if (id.HasValue)
             {
-                try
-                {
-                    ParticipantQueryResult participantResult = await caller.GET<ParticipantQueryResult>(getAPIPath(), getParameters());
-                    if (participantResult?.participant != null)
-                        return participantResult.participant;
-                } catch(Exception) { }
+                ParticipantQueryResult participantResult = await caller.GET<ParticipantQueryResult>(getAPIPath(id), getParameters());
+                if (participantResult?.participant != null)
+                    return participantResult.participant;
             }
 
-            //If scrub challonge only provided group_player_ids, we fetch ALL participants and find the one we want
-            try
-            {
-                List<ParticipantQueryResult> participantGroupResult = await caller.GET<List<ParticipantQueryResult>>(getGroupStageApiPath(), getParameters());
-                return participantGroupResult.FirstOrDefault(x => x.participant.group_player_ids.Contains(ParticipantID.GroupID))?.participant;
-            } catch(Exception) { }
-            return null;
-
+            List<ParticipantQueryResult> participantGroupResult = await caller.GET<List<ParticipantQueryResult>>(getAPIPath(null), getParameters());
+            ParticipantIDCache.Instance.PopulateCache(participantGroupResult.Select(x => x.participant).ToArray());
+            return participantGroupResult.FirstOrDefault(x => x.participant.id == ParticipantID.ID || x.participant.group_player_ids.Contains(ParticipantID.GroupID))?.participant;
+            
         }
     }
 }

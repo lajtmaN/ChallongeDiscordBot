@@ -80,6 +80,7 @@
     <Compile Include="Main\ITournament.cs" />
     <Compile Include="Main\IMatch.cs" />
     <Compile Include="Main\ParticipantID.cs" />
+    <Compile Include="Main\ParticipantIDCache.cs" />
     <Compile Include="Main\TournamentCreator.cs" />
     <Compile Include="Score.cs" />
     <Compile Include="Core\Queries\TournamentQuery.cs" />
