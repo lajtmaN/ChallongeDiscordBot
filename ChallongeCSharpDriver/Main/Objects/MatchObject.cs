@@ -14,11 +14,15 @@ namespace ChallongeCSharpDriver.Main.Objects {
         private MatchResult result;
         private UpdateMatchQuery updateMatchQuery;
         private MatchState matchState;
-        public Task<IParticipant> player1 => GetPlayer(result.player1_id);
-        public Task<IParticipant> player2 => GetPlayer(result.player2_id);
+        public int? player1_id => result.player1_id;
+        public Task<IParticipant> player1 => GetPlayer(player1_id);
+        public int? player2_id => result.player2_id;
+        public Task<IParticipant> player2 => GetPlayer(player2_id);
         public string Location => result.location;
         public Task<IParticipant> winner => GetPlayer(result.winner_id);
         public Task<IParticipant> loser => GetPlayer(result.loser_id);
+        public int id => result.id;
+        public int tournament_id => result.tournament_id;
         public MatchState state => matchState;
         public DateTime StartedAt => result.started_at;
         public DateTime? MarkedAsActive => result.underway_at;
@@ -46,7 +50,7 @@ namespace ChallongeCSharpDriver.Main.Objects {
 
         private async Task<IParticipant> GetPlayer(int? playerID) {
             if (playerID.HasValue) {
-                ParticipantResult participantResult = await new ParticipantQuery(result.tournament_subdomain_id, playerID.Value).call(caller);
+                ParticipantResult participantResult = await new ParticipantQuery(result.tournament_subdomain_id, new ParticipantID(playerID.Value, playerID.Value)).call(caller);
                 return new ParticipantObject(participantResult);
             } else {
                 throw new ParticipantNotAssigned();

@@ -21,15 +21,15 @@ namespace ChallongeDiscordBot
             AttachEvents();
 
             DiscordBot.StartDiscordBotThread();
-            ChallongeClient.StartLoaderThread();
         }
 
         private void AttachEvents()
         {
+            DiscordBot.OnDiscordBotReady += (s, a) => ChallongeClient.StartLoaderThread();
             ChallongeClient.OnNewMatchStarted += OnOnNewMatchStarted;
             ChallongeClient.OnTournamentStarted += ChallongeClientOnOnTournamentStarted;
         }
-
+        
         private async void ChallongeClientOnOnTournamentStarted(object sender, OnTournamentStartedEventArgs args)
         {
             string channelName = args.Tournament.URL;
@@ -42,7 +42,7 @@ namespace ChallongeDiscordBot
             IParticipant team1 = await args.Match.player1;
             IParticipant team2 = await args.Match.player2;
 
-            string message = $"{team1.name} vs {team2.name}. Kampen er klar til at blive spillet. {Environment.NewLine}Server: {args.Match.Location}";
+            string message = $"{team1.name} vs {team2.name}. Kampen er klar til at blive spillet :gun:. {Environment.NewLine}Server: {args.Match.Location}";
             DiscordBot.SendMessage(message, args.Tournament.URL);
         }
     }

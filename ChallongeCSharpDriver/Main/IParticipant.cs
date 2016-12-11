@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 namespace ChallongeCSharpDriver.Main {
     public interface IParticipant {
+        ParticipantID id { get; }
         string name { get; }
+        int tournament_id { get; }
     }
 }

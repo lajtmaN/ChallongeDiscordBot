@@ -8,12 +8,12 @@ namespace ChallongeCSharpDriver.Main.Objects {
     using ChallongeCSharpDriver.Core.Results;
 
     public class ParticipantObject : IParticipant {
-        private ParticipantResult result;
-        public string name {
-            get {
-                return result.name;
-            }
-        }
+        private readonly ParticipantResult result;
+        
+        public ParticipantID id => new ParticipantID(result.id, result.group_player_ids.FirstOrDefault());
+        public string name => result.display_name;
+
+        public int tournament_id => result.tournament_id;
 
         public ParticipantObject(ParticipantResult result) {
             this.result = result;

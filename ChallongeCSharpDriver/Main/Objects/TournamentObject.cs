@@ -22,11 +22,9 @@ namespace ChallongeCSharpDriver.Main.Objects {
             this.caller = caller;
         }
 
-        public override string ToString() {
-            return "Tournament #" + result.id + ", \"" + result.name + "\" at https://challonge.com/" + result.url + " (" + result.description + ")";
-        }
+        public override string ToString() => $"Tournament #{TournamentID}, \"{Name}\"";
 
-        public async Task AddParticipant(String participant) {
+        public async Task AddParticipant(string participant) {
             await new AddParticipantQuery(result.id, new ParticipantEntry(participant)).call(caller);
         }
 
@@ -81,5 +79,10 @@ namespace ChallongeCSharpDriver.Main.Objects {
         public string SubDomain => result.subdomain;
         public string Name => result.name;
         public string Description => result.description;
+        public async Task<IList<IParticipant>> GetParticipants()
+        {
+            var participantResults = await new ParticipantsQuery(TournamentSubdomainID).call(caller);
+            return participantResults.Select(r => new ParticipantObject(r)).Cast<IParticipant>().ToList();
+        }
     }
 }

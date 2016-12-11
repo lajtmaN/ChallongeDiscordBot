@@ -20,5 +20,7 @@ namespace ChallongeCSharpDriver.Main
         string Name { get; }
 
         string Description { get; }
+
+        Task<IList<IParticipant>> GetParticipants();
     }
 }

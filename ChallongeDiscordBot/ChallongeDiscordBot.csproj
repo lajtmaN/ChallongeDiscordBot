@@ -118,10 +118,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ChallongeClient.cs" />
-    <Compile Include="ChallongeDataLoader.cs" />
     <Compile Include="ChallongeDiscordBot.cs" />
     <Compile Include="ChallongeDiscordBotConfig.cs" />
     <Compile Include="DiscordBot.cs" />
+    <Compile Include="DiscordChallongeDatabase.cs" />
+    <Compile Include="Entities\Match.cs" />
+    <Compile Include="Entities\Participant.cs" />
+    <Compile Include="Entities\Tournament.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

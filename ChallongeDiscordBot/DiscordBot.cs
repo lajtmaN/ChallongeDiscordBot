@@ -30,6 +30,15 @@ namespace ChallongeDiscordBot
             AttachEvents();
         }
 
+        public event EventHandler OnDiscordBotReady;
+
+        private void BotOnReady(object sender, EventArgs eventArgs)
+        {
+            BotProfile = (sender as DiscordClient)?.CurrentUser;
+            Console.WriteLine("Discord Bot: '" + BotProfile?.Name + "' is ready");
+            OnDiscordBotReady?.Invoke(this, EventArgs.Empty);
+        }
+
         private void AttachEvents()
         {
             Bot.Ready += BotOnReady;
@@ -53,13 +62,7 @@ namespace ChallongeDiscordBot
             Bot.ServerAvailable -= BotOnJoinedServer;
             Bot.JoinedServer -= BotOnJoinedServer;
         }
-
-        private void BotOnReady(object sender, EventArgs eventArgs)
-        {
-            BotProfile = (sender as DiscordClient)?.CurrentUser;
-            Console.WriteLine("Discord Bot: '" + BotProfile?.Name + "' is ready");
-        }
-
+        
         public void StartDiscordBotThread()
         {
              new Task(() =>
@@ -80,11 +83,11 @@ namespace ChallongeDiscordBot
             switch (userMessage)
             {
                 case "hej":
-                    await messageEventArgs.Channel.SendMessage($"Øhm.. hej {messageEventArgs.User.Name}?");
+                    await messageEventArgs.Channel.SendMessage($"Øhm.. Hej {messageEventArgs.User.Name}?");
                     return;
 
                 default:
-                    await messageEventArgs.Channel.SendMessage("Undskyld, jeg forstod ikke hvad du ville?");
+                    await messageEventArgs.Channel.SendMessage("Undskyld, jeg forstår ikke hvad du vil :confused:");
                     return;
             }
         }
@@ -124,10 +127,11 @@ namespace ChallongeDiscordBot
 
             string receivedText = input.Message.Text.Trim();
 
+            bool privateMessage = input.Channel.IsPrivate;
             bool metionMe = input.Message.IsMentioningMe();
             bool startWithBotPrefix = receivedText.StartsWith(BOT_PREFIX);
 
-            if (!metionMe && !startWithBotPrefix)
+            if (!metionMe && !startWithBotPrefix && !privateMessage)
                 return false;
 
             if (metionMe)
@@ -138,6 +142,11 @@ namespace ChallongeDiscordBot
             if (startWithBotPrefix)
             {
                 userMessage = receivedText.Substring(BOT_PREFIX.Length).Trim().ToLowerInvariant();
+                return true;
+            }
+            if (privateMessage)
+            {
+                userMessage = receivedText;
                 return true;
             }
             return false;
