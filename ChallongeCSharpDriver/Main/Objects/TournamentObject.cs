@@ -76,9 +76,12 @@ namespace ChallongeCSharpDriver.Main.Objects {
 
         public int TournamentID => result.id;
         public string URL => result.url;
+        public string FullLink => result.full_challonge_url;
         public string SubDomain => result.subdomain;
         public string Name => result.name;
         public string Description => result.description;
+        public DateTime? CheckInStartedTime => result.started_checking_in_at;
+
         public async Task<IList<IParticipant>> GetParticipants()
         {
             var participantResults = await new ParticipantsQuery(TournamentSubdomainID).call(caller);

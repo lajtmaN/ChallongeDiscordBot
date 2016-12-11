@@ -15,11 +15,15 @@ namespace ChallongeCSharpDriver.Main
 
         string URL { get; }
 
+        string FullLink { get; }
+
         string SubDomain { get; }
 
         string Name { get; }
 
         string Description { get; }
+
+        DateTime? CheckInStartedTime { get; }
 
         Task<IList<IParticipant>> GetParticipants();
     }

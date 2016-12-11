@@ -47,11 +47,13 @@ namespace ChallongeCSharpDriver.Main
 
         public int? GetParticipantID(ParticipantID id)
         {
-            if (participantDictionary.ContainsKey(id.ID))
-                return participantDictionary[id.ID];
-            if (participantDictionary.ContainsKey(id.GroupID))
-                return participantDictionary[id.GroupID];
+            return GetParticipantID(id.ID) ?? GetParticipantID(id.GroupID);
+        }
 
+        public int? GetParticipantID(int id)
+        {
+            if (participantDictionary.ContainsKey(id))
+                return participantDictionary[id];
             return null;
         }
     }

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -39,10 +41,12 @@ namespace ChallongeDiscordBot
 
         public event OnNewMatchStartedEvent OnNewMatchStarted;
         public event OnTournamentStartedEvent OnTournamentStarted;
+        public event OnTournamentCheckInOpenedEvent OnTournamentCheckInOpened;
 
         public void StartLoaderThread()
         {
             LoaderTimer.Change(TimeSpan.Zero, TimeSpan.FromSeconds(UPDATE_RATE_SECONDS));
+            Console.WriteLine($"Starting Challonge Client. Reloading with {UPDATE_RATE_SECONDS} interval.");
         }
 
         /// <summary>
@@ -114,7 +118,17 @@ namespace ChallongeDiscordBot
             {
                 var challongeTournament = await ChallongeTournaments.getTournament(match.Tournament.ShortName);
                 var challongeMatch = await ChallongeMatches.GetMatch(match.Tournament.ChallongeIDWithSubdomain, match.ID);
-                var args = new OnNewMatchStartedArgs(challongeMatch, challongeTournament);
+                var team1 = await Database.Participants.FindAsync(ParticipantIDCache.Instance.GetParticipantID(challongeMatch.player1_id.Value));
+                var team2 = await Database.Participants.FindAsync(ParticipantIDCache.Instance.GetParticipantID(challongeMatch.player2_id.Value));
+                var args = new OnNewMatchStartedArgs
+                {
+                    Match = challongeMatch,
+                    Tournament = challongeTournament,
+                    Team1DiscordName = team1.DiscordUserName,
+                    Team1SeatNum = team1.SeatNum,
+                    Team2DiscordName = team2.DiscordUserName,
+                    Team2SeatNum = team2.SeatNum
+                };
                 OnNewMatchStarted?.Invoke(this, args);
 
                 match.Announced = true;
@@ -124,20 +138,40 @@ namespace ChallongeDiscordBot
 
         private async Task AnnounceNewTournaments()
         {
-            foreach (var tourn in Database.Tournaments.Where(x => !x.Announced))
+            foreach (var tourn in Database.Tournaments.Where(x => !x.Announced || !x.CheckInOpen))
             {
                 var challongeTournament = await ChallongeTournaments.getTournament(tourn.ShortName);
                 var args = new OnTournamentStartedEventArgs(challongeTournament);
-                OnTournamentStarted?.Invoke(this, args);
 
-                tourn.Announced = true;
+                if (!tourn.Announced)
+                {
+                    OnTournamentStarted?.Invoke(this, args);
+                    tourn.Announced = true;
+                }
+                if (challongeTournament.CheckInStartedTime.HasValue && !tourn.CheckInOpen)
+                {
+                    OnTournamentCheckInOpened?.Invoke(this, args);
+                    tourn.CheckInOpen = true;
+                }
             }
+            await Database.SaveChangesAsync();
+        }
+
+        public async void CheckUserIn(int tournamentId, string teamDisplayName, string discordUserName, int seatNum)
+        {
+            var participant = await Database.Participants.FirstAsync(x => x.DisplayName == teamDisplayName && x.TournamentID == tournamentId);
+
+            participant.SeatNum = seatNum;
+            participant.DiscordUserName = discordUserName;
+            participant.CheckedIn = true;
+
             await Database.SaveChangesAsync();
         }
     }
     
     public delegate void OnNewMatchStartedEvent(object sender, OnNewMatchStartedArgs args);
     public delegate void OnTournamentStartedEvent(object sender, OnTournamentStartedEventArgs args);
+    public delegate void OnTournamentCheckInOpenedEvent(object sender, OnTournamentStartedEventArgs args);
 
     public class OnTournamentStartedEventArgs
     {
@@ -150,12 +184,11 @@ namespace ChallongeDiscordBot
 
     public class OnNewMatchStartedArgs : EventArgs
     {
-        public OnNewMatchStartedArgs(IOpenMatch match, IStartedTournament tournament)
-        {
-            Match = match;
-            Tournament = tournament;
-        }
-        public IOpenMatch Match { get; }
-        public IStartedTournament Tournament { get; }
+        public IOpenMatch Match { get; set; }
+        public IStartedTournament Tournament { get; set; }
+        public string Team1DiscordName { get; set; }
+        public int? Team1SeatNum { get; set; }
+        public string Team2DiscordName { get; set; }
+        public int? Team2SeatNum { get; set; }
     }
 }
