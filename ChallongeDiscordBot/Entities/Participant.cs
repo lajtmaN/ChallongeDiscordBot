@@ -21,6 +21,7 @@ namespace ChallongeDiscordBot.Entities
         public int? GroupParticipantID { get; set; }
         public int? SeatNum { get; set; }
         public string DiscordUserName { get; set; }
+        public string DiscordMentionName { get; set; }
         public string DisplayName { get; set; }
         public bool CheckedIn { get; set; }
         public int TournamentID { get; set; }

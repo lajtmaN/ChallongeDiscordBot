@@ -39,6 +39,7 @@ namespace ChallongeDiscordBot
             Database = new DiscordChallongeDatabase();
         }
 
+        public event OnNewParticipantRegisteredEvent OnNewParticipantRegistered;
         public event OnNewMatchStartedEvent OnNewMatchStarted;
         public event OnTournamentStartedEvent OnTournamentStarted;
         public event OnTournamentCheckInOpenedEvent OnTournamentCheckInOpened;
@@ -82,11 +83,13 @@ namespace ChallongeDiscordBot
             {
                 var challongeTournament = await ChallongeTournaments.getTournament(tourn.ShortName);
                 var participants = await challongeTournament.GetParticipants();
+                //TODO Check if participant is still active or have been deleted! if removed from challonge, same should occour in db. we can fetch deleted teams from challonge
                 foreach (var chalPart in participants)
                 {
                     if (await Database.Participants.FindAsync(chalPart.id.ID) == null)
                     {
                         Database.Participants.Add(Participant.CreateParticipant(chalPart));
+                        OnNewParticipantRegistered?.Invoke(this, new OnNewParticipantRegisteredEventArgs(chalPart, challongeTournament));
                         Console.WriteLine($"New participant added: {chalPart.name}");
                     }
                 }
@@ -99,7 +102,7 @@ namespace ChallongeDiscordBot
             foreach (var tourn in Database.Tournaments)
             {
                 var challongeTournament = await ChallongeTournaments.getTournament(tourn.ShortName);
-                var matches = await challongeTournament.GetAllActiveMatches();
+                var matches = await challongeTournament.GetAllOpenMatches();
                 foreach (var chalMatch in matches)
                 {
                     if (await Database.Matches.FindAsync(chalMatch.id) == null)
@@ -118,15 +121,18 @@ namespace ChallongeDiscordBot
             {
                 var challongeTournament = await ChallongeTournaments.getTournament(match.Tournament.ShortName);
                 var challongeMatch = await ChallongeMatches.GetMatch(match.Tournament.ChallongeIDWithSubdomain, match.ID);
+                if (!challongeMatch.MatchMarkedAsActive)
+                    continue;
+
                 var team1 = await Database.Participants.FindAsync(ParticipantIDCache.Instance.GetParticipantID(challongeMatch.player1_id.Value));
                 var team2 = await Database.Participants.FindAsync(ParticipantIDCache.Instance.GetParticipantID(challongeMatch.player2_id.Value));
                 var args = new OnNewMatchStartedArgs
                 {
                     Match = challongeMatch,
                     Tournament = challongeTournament,
-                    Team1DiscordName = team1.DiscordUserName,
+                    Team1DiscordName = team1.DiscordMentionName,
                     Team1SeatNum = team1.SeatNum,
-                    Team2DiscordName = team2.DiscordUserName,
+                    Team2DiscordName = team2.DiscordMentionName,
                     Team2SeatNum = team2.SeatNum
                 };
                 OnNewMatchStarted?.Invoke(this, args);
@@ -157,23 +163,36 @@ namespace ChallongeDiscordBot
             await Database.SaveChangesAsync();
         }
 
-        public async void CheckUserIn(int tournamentId, string teamDisplayName, string discordUserName, int seatNum)
+        public async void CheckUserIn(int tournamentId, string teamDisplayName, string discordUserName, string discordMention, int seatNum)
         {
             var participant = await Database.Participants.FirstAsync(x => x.DisplayName == teamDisplayName && x.TournamentID == tournamentId);
 
             participant.SeatNum = seatNum;
             participant.DiscordUserName = discordUserName;
+            participant.DiscordMentionName = discordMention;
             participant.CheckedIn = true;
 
             await Database.SaveChangesAsync();
         }
     }
-    
+
+    public delegate void OnNewParticipantRegisteredEvent(object sender, OnNewParticipantRegisteredEventArgs args);
     public delegate void OnNewMatchStartedEvent(object sender, OnNewMatchStartedArgs args);
     public delegate void OnTournamentStartedEvent(object sender, OnTournamentStartedEventArgs args);
     public delegate void OnTournamentCheckInOpenedEvent(object sender, OnTournamentStartedEventArgs args);
 
-    public class OnTournamentStartedEventArgs
+    public class OnNewParticipantRegisteredEventArgs : EventArgs
+    {
+        public OnNewParticipantRegisteredEventArgs(IParticipant p, ITournament t)
+        {
+            Participant = p;
+            Tournament = t;
+        }
+        public IParticipant Participant { get; }
+        public ITournament Tournament { get; }
+    }
+
+    public class OnTournamentStartedEventArgs : EventArgs
     {
         public OnTournamentStartedEventArgs(IStartedTournament tournament)
         {

@@ -58,11 +58,13 @@ namespace ChallongeDiscordBot
         private void CreateCommands()
         {
             #region Check In
-            
+            //TODO maybe use addCheck and make all the checking there
+            string paramHold = "Holdnavn";
+            string paramSeat = "Pladsnummer";
             Bot.GetService<CommandService>().CreateCommand("checkin")
                 .Description("Meld dig som klar til at spille en turnering")
-                .Parameter("Holdnavn")
-                .Parameter("Pladsnummer")
+                .Parameter(paramHold)
+                .Parameter(paramSeat)
                 .Do(async e =>
                 {
                     using (var db = new DiscordChallongeDatabase())
@@ -70,7 +72,7 @@ namespace ChallongeDiscordBot
                         var tourn = db.Tournaments.FirstOrDefault(x => x.ShortName == e.Channel.Name);
                         if (tourn == null)
                             await e.Channel.SendMessage("Du kan ikke checke ind i denne kanal, da den ikke er relateret til en turnering.");
-                        else if (tourn.Participants.Any(x => x.DisplayName == e.GetArg("Holdnavn") && x.TournamentID == tourn.ID))
+                        else if (tourn.Participants.Any(x => x.DisplayName == e.GetArg(paramHold) && x.TournamentID == tourn.ID))
                         {
                             int seatNum;
                             if (int.TryParse(e.GetArg("Pladsnummer"), out seatNum) && seatNum > 0 && seatNum < 400) //TODO check if the seat has been taken - and maybe add website username
@@ -79,17 +81,17 @@ namespace ChallongeDiscordBot
                                 {
                                     TournamentID = tourn.ID,
                                     SeatNum = seatNum,
-                                    TeamName = e.GetArg("Holdnavn"),
+                                    TeamName = e.GetArg(paramHold),
                                     User = e.User
                                 };
                                 OnUserCheckedIn?.Invoke(this, args);
-                                await e.Channel.SendMessage($"Super {e.User.NicknameMention}! Du har nu meldt din ankomst. Jeg skal nok give lyd når I skal spille :wink:");
+                                await e.Channel.SendMessage($"Super {e.User.NicknameMention} :ok_hand: Du har nu meldt din ankomst. Jeg skal nok give lyd når I skal spille :wink:");
                             }
-                            else
-                                await e.Channel.SendMessage($"{e.GetArg("Pladsnr.")} er ikke et gyldigt pladsnr.");
+                            else 
+                                await e.Channel.SendMessage($"{e.GetArg(paramSeat)} er ikke et gyldigt pladsnr.");
                         }
                         else
-                            await e.Channel.SendMessage($"Holdet '{e.GetArg("Holdnavn")}' ser ikke ud til at være tilmeldt {tourn.ShortName} turneringen");
+                            await e.Channel.SendMessage($"Holdet '{e.GetArg(paramHold)}' ser ikke ud til at være tilmeldt {tourn.ShortName} turneringen");
                     }
                 });
 
@@ -129,19 +131,18 @@ namespace ChallongeDiscordBot
             if (!MessageIsForMe(messageEventArgs, out userMessage))
                 return;
 
-            switch (userMessage)
+            if (userMessage.StartsWith("hej"))
             {
-                case "hej":
-                    await messageEventArgs.Channel.SendMessage($"Hej {messageEventArgs.User.Name} :nerd:");
-                    return;
-                case "checkin":
-                    await messageEventArgs.Channel.SendMessage($"For at checke ind, skal du skrive `{BOT_PREFIX}checkin <Holdnavn> <Pladsnummer>`");
-                    return;
-                default:
-                    if (userMessage.StartsWith("checkin")) return; //hack to stop it writing when running commands
-                    if (userMessage.StartsWith("help")) return; //hack to stop it writing when running commands
-                    await messageEventArgs.Channel.SendMessage("Undskyld, jeg forstår ikke hvad du vil :confused:");
-                    return;
+                await messageEventArgs.Channel.SendMessage($"Hej {messageEventArgs.User.Name} :nerd:");
+            }
+            else if (userMessage.StartsWith("checkin") && userMessage.Count(x => x == ' ') < 2) //not all parameters supplied
+            {
+                await messageEventArgs.Channel.SendMessage($"For at checke ind, skal du skrive `{BOT_PREFIX}checkin <Holdnavn> <Pladsnummer>`");
+            }
+            else if (userMessage == "help" || userMessage.StartsWith("checkin")) { } //handled with commands
+            else
+            { 
+                await messageEventArgs.Channel.SendMessage("Undskyld, jeg forstår ikke hvad du vil :confused:");
             }
         }
 
@@ -150,11 +151,11 @@ namespace ChallongeDiscordBot
             SendMessage(rawMessage, DefaultChannel);
         }
 
-        public void SendMessage(string rawMessage, string channel)
+        public async void SendMessage(string rawMessage, string channel)
         {
             channel = channel.ToLower();
 
-            if (Channels.ContainsKey(channel))
+            if (await CreateChannel(channel) && Channels.ContainsKey(channel))
                 SendMessage(rawMessage, Channels[channel]);
         }
 

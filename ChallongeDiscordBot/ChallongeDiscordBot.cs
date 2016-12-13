@@ -31,12 +31,13 @@ namespace ChallongeDiscordBot
             ChallongeClient.OnNewMatchStarted += OnOnNewMatchStarted;
             ChallongeClient.OnTournamentStarted += ChallongeClientOnOnTournamentStarted;
             ChallongeClient.OnTournamentCheckInOpened += ChallongeClientOnOnTournamentCheckInOpened;
+            ChallongeClient.OnNewParticipantRegistered += ChallongeClientOnOnNewParticipantRegistered;
         }
-
+        
         private void DiscordBotOnOnUserCheckedIn(object sender, UserCheckedInEventArgs args)
         {
-            ChallongeClient.CheckUserIn(args.TournamentID, args.TeamName, args.User.NicknameMention, args.SeatNum);
-            Console.WriteLine($"{args.TeamName} just checked in to from seatnum {args.SeatNum} by Discord User: {args.User.NicknameMention}");
+            ChallongeClient.CheckUserIn(args.TournamentID, args.TeamName, args.User.Name, args.User.Mention, args.SeatNum);
+            Console.WriteLine($"{args.TeamName} just checked in to from seatnum {args.SeatNum} by Discord User: {args.User.Name}");
         }
 
         private async void ChallongeClientOnOnTournamentStarted(object sender, OnTournamentStartedEventArgs args)
@@ -67,8 +68,14 @@ namespace ChallongeDiscordBot
         {
             string channelName = args.Tournament.URL;
             string message = $"Det er nu muligt at meddele sin ankomst til {args.Tournament.Name} turneringen.{Environment.NewLine}"
-                           + $"For at checke ind, skriver du: '{DiscordBot.BOT_PREFIX} checkin', og følger de angivne instruktioner.";
+                           + $"For at checke ind, skriver du: '{DiscordBot.BOT_PREFIX}checkin', og følger de angivne instruktioner.";
             DiscordBot.SendMessage(message, channelName);
+        }
+        
+        private void ChallongeClientOnOnNewParticipantRegistered(object sender, OnNewParticipantRegisteredEventArgs args)
+        {
+            string message = $"{args.Participant.name} har lige tilmeldt sig {args.Tournament.Name} turneringen";
+            DiscordBot.SendMessage(message, args.Tournament.URL);
         }
     }
 }
