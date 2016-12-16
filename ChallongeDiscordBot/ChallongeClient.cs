@@ -11,6 +11,7 @@ using ChallongeCSharpDriver.Core.Queries;
 using ChallongeCSharpDriver.Main;
 using ChallongeCSharpDriver.Main.Objects;
 using ChallongeDiscordBot.Entities;
+using RestSharp.Extensions;
 
 namespace ChallongeDiscordBot
 {
@@ -20,6 +21,7 @@ namespace ChallongeDiscordBot
         private Timer LoaderTimer { get; }
         private ChallongeTournaments ChallongeTournaments { get; }
         private ChallongeMatches ChallongeMatches { get; }
+        private ChallongeHTTPClientAPICaller Caller { get; }
         private DateTime CreatedAfterDate { get; }
 
         public DiscordChallongeDatabase Database { get; }
@@ -29,9 +31,9 @@ namespace ChallongeDiscordBot
         private ChallongeClient(string apiKey, string subdomain, DateTime createdAfterDate)
         {
             var config = new ChallongeConfig(apiKey);
-            var caller = new ChallongeHTTPClientAPICaller(config);
-            ChallongeTournaments = new ChallongeTournaments(caller, subdomain);
-            ChallongeMatches = new ChallongeMatches(caller);
+            Caller = new ChallongeHTTPClientAPICaller(config);
+            ChallongeTournaments = new ChallongeTournaments(Caller, subdomain);
+            ChallongeMatches = new ChallongeMatches(Caller);
 
             CreatedAfterDate = createdAfterDate;
             
@@ -47,7 +49,7 @@ namespace ChallongeDiscordBot
         public void StartLoaderThread()
         {
             LoaderTimer.Change(TimeSpan.Zero, TimeSpan.FromSeconds(UPDATE_RATE_SECONDS));
-            Console.WriteLine($"Starting Challonge Client. Reloading with {UPDATE_RATE_SECONDS} interval.");
+            Console.WriteLine($"Starting Challonge Client. Reloading with {UPDATE_RATE_SECONDS} sec. interval.");
         }
 
         /// <summary>
@@ -83,14 +85,19 @@ namespace ChallongeDiscordBot
             {
                 var challongeTournament = await ChallongeTournaments.getTournament(tourn.ShortName);
                 var participants = await challongeTournament.GetParticipants();
-                //TODO Check if participant is still active or have been deleted! if removed from challonge, same should occour in db. we can fetch deleted teams from challonge
                 foreach (var chalPart in participants)
                 {
-                    if (await Database.Participants.FindAsync(chalPart.id.ID) == null)
+                    var participant = await Database.Participants.FindAsync(chalPart.id.ID);
+                    bool exist = participant != null;
+                    if (chalPart.active && !exist)
                     {
                         Database.Participants.Add(Participant.CreateParticipant(chalPart));
                         OnNewParticipantRegistered?.Invoke(this, new OnNewParticipantRegisteredEventArgs(chalPart, challongeTournament));
                         Console.WriteLine($"New participant added: {chalPart.name}");
+                    }
+                    else if (!chalPart.active && exist)
+                    {
+                        Database.Participants.Remove(participant);
                     }
                 }
             }
@@ -165,12 +172,16 @@ namespace ChallongeDiscordBot
 
         public async void CheckUserIn(int tournamentId, string teamDisplayName, string discordUserName, string discordMention, int seatNum)
         {
-            var participant = await Database.Participants.FirstAsync(x => x.DisplayName == teamDisplayName && x.TournamentID == tournamentId);
+            Participant participant = await Database.Participants.FirstAsync(x => x.DisplayName == teamDisplayName && x.TournamentID == tournamentId);
 
             participant.SeatNum = seatNum;
             participant.DiscordUserName = discordUserName;
             participant.DiscordMentionName = discordMention;
             participant.CheckedIn = true;
+
+            string fullTournamentId = Database.Tournaments.Find(tournamentId)?.ChallongeIDWithSubdomain;
+            if (fullTournamentId.HasValue())
+                await ParticipantCheckInQuery.CheckIn(fullTournamentId, participant.ID, Caller);
 
             await Database.SaveChangesAsync();
         }

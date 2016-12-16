@@ -34,8 +34,6 @@ namespace ChallongeCSharpDriver.Core.Queries {
         }
 
         public async Task<ParticipantResult> call(ChallongeAPICaller caller) {
-            //TODO: Implement some cache here please
-
             int? id = ParticipantIDCache.Instance.GetParticipantID(ParticipantID);
             if (id.HasValue)
             {

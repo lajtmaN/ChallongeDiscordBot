@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ChallongeCSharpDriver.Core.Queries;
 
 namespace ChallongeCSharpDriver.Main.Objects {
     using ChallongeCSharpDriver.Core.Results;
@@ -14,6 +15,7 @@ namespace ChallongeCSharpDriver.Main.Objects {
         public string name => result.display_name;
 
         public int tournament_id => result.tournament_id;
+        public bool active => result.active;
 
         public ParticipantObject(ParticipantResult result) {
             this.result = result;

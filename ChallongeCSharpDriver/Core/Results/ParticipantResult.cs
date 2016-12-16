@@ -9,7 +9,7 @@ namespace ChallongeCSharpDriver.Core.Results {
         public int tournament_id { get; set; }
         public int id { get; set; }
         public string display_name { get; set; }
-        public string active { get; set; }
+        public bool active { get; set; }
         public List<int> group_player_ids { get; set; }
     }
 }

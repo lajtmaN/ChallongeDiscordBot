@@ -37,7 +37,7 @@ namespace ChallongeDiscordBot
         private void DiscordBotOnOnUserCheckedIn(object sender, UserCheckedInEventArgs args)
         {
             ChallongeClient.CheckUserIn(args.TournamentID, args.TeamName, args.User.Name, args.User.Mention, args.SeatNum);
-            Console.WriteLine($"{args.TeamName} just checked in to from seatnum {args.SeatNum} by Discord User: {args.User.Name}");
+            Console.WriteLine($"{args.TeamName} just checked in from seatnum {args.SeatNum} by Discord User: {args.User.Name}");
         }
 
         private async void ChallongeClientOnOnTournamentStarted(object sender, OnTournamentStartedEventArgs args)
@@ -67,7 +67,7 @@ namespace ChallongeDiscordBot
         private void ChallongeClientOnOnTournamentCheckInOpened(object sender, OnTournamentStartedEventArgs args)
         {
             string channelName = args.Tournament.URL;
-            string message = $"Det er nu muligt at meddele sin ankomst til {args.Tournament.Name} turneringen.{Environment.NewLine}"
+            string message = $"@everyone Det er nu muligt at meddele sin ankomst til {args.Tournament.Name} turneringen.{Environment.NewLine}"
                            + $"For at checke ind, skriver du: '{DiscordBot.BOT_PREFIX}checkin', og følger de angivne instruktioner.";
             DiscordBot.SendMessage(message, channelName);
         }

@@ -9,5 +9,6 @@ namespace ChallongeCSharpDriver.Main {
         ParticipantID id { get; }
         string name { get; }
         int tournament_id { get; }
+        bool active { get; }
     }
 }

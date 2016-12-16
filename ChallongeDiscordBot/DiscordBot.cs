@@ -72,6 +72,8 @@ namespace ChallongeDiscordBot
                         var tourn = db.Tournaments.FirstOrDefault(x => x.ShortName == e.Channel.Name);
                         if (tourn == null)
                             await e.Channel.SendMessage("Du kan ikke checke ind i denne kanal, da den ikke er relateret til en turnering.");
+                        else if (!tourn.CheckInOpen)
+                            await e.Channel.SendMessage("Du kan ikke checke ind til den turneringen endnu. Vi åbner checkin kort tid tilmeldingen åbner.");
                         else if (tourn.Participants.Any(x => x.DisplayName == e.GetArg(paramHold) && x.TournamentID == tourn.ID))
                         {
                             int seatNum;
@@ -171,7 +173,12 @@ namespace ChallongeDiscordBot
             if (Channels.ContainsKey(channelName))
                 return true;
 
-            return await Server.CreateChannel(channelName, ChannelType.Text) != null;
+            Channel newChan = await Server.CreateChannel(channelName, ChannelType.Text);
+            bool success = newChan != null;
+            if (success)
+                Channels.Add(channelName, newChan);
+
+            return success;
         }
 
         private static bool MessageIsForMe(MessageEventArgs input, out string userMessage)

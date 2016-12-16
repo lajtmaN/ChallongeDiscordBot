@@ -74,6 +74,7 @@
     <Compile Include="Core\Queries\CreateTournamentQuery.cs" />
     <Compile Include="Core\Queries\DeleteTournamentQuery.cs" />
     <Compile Include="Core\Queries\MatchQuery.cs" />
+    <Compile Include="Core\Queries\ParticipantCheckInQuery.cs" />
     <Compile Include="Core\Queries\ParticipantsQuery.cs" />
     <Compile Include="Core\Queries\StartTournamentQuery.cs" />
     <Compile Include="Main\ChallongeMatches.cs" />
