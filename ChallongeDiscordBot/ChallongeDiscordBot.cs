@@ -43,7 +43,7 @@ namespace ChallongeDiscordBot
         private async void ChallongeClientOnOnTournamentStarted(object sender, OnTournamentStartedEventArgs args)
         {
             string channelName = args.Tournament.URL;
-            bool channelExist = await DiscordBot.CreateChannel(channelName);
+            DiscordBot.CreateChannel(channelName);
             DiscordBot.SendMessage($"I denne kanal vil der komme informationer fra {args.Tournament.Name} turneringen.{Environment.NewLine}Hold dig venligst opdateret i denne kanal hvis du deltager i turneringen.", channelName);
             Console.WriteLine($"{args.Tournament.Name} has started");
         }
@@ -68,13 +68,13 @@ namespace ChallongeDiscordBot
         {
             string channelName = args.Tournament.URL;
             string message = $"@everyone Det er nu muligt at meddele sin ankomst til {args.Tournament.Name} turneringen.{Environment.NewLine}"
-                           + $"For at checke ind, skriver du: '{DiscordBot.BOT_PREFIX}checkin', og følger de angivne instruktioner.";
+                           + $"For at checke ind, skriver du: {DiscordBot.BOT_PREFIX}checkin, og følger de angivne instruktioner.";
             DiscordBot.SendMessage(message, channelName);
         }
         
         private void ChallongeClientOnOnNewParticipantRegistered(object sender, OnNewParticipantRegisteredEventArgs args)
         {
-            string message = $"{args.Participant.name} har lige tilmeldt sig {args.Tournament.Name} turneringen";
+            string message = $"{args.Participant.name} har lige tilmeldt sig {args.Tournament.Name} turneringen.";
             DiscordBot.SendMessage(message, args.Tournament.URL);
         }
     }

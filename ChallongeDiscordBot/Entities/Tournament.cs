@@ -16,7 +16,9 @@ namespace ChallongeDiscordBot.Entities
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int ID { get; set; }
         public string ChallongeIDWithSubdomain { get; set; }
+        public string FullLink { get; set; }
         public string ShortName { get; set; }
+        public string Name { get; set; }
         public bool Announced { get; set; }
         public bool CheckInOpen { get; set; }
         public virtual IList<Match> Matches { get; set; }
@@ -28,7 +30,9 @@ namespace ChallongeDiscordBot.Entities
             {
                 ID = challonge.TournamentID,
                 ChallongeIDWithSubdomain = challonge.TournamentSubdomainID,
-                ShortName = challonge.URL
+                ShortName = challonge.URL,
+                Name = challonge.Name,
+                FullLink = challonge.FullLink
             };
         }
     }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -69,15 +70,15 @@ namespace ChallongeDiscordBot
                 {
                     using (var db = new DiscordChallongeDatabase())
                     {
-                        var tourn = db.Tournaments.FirstOrDefault(x => x.ShortName == e.Channel.Name);
+                        var tourn = await db.Tournaments.FirstOrDefaultAsync(x => x.ShortName == e.Channel.Name);
                         if (tourn == null)
                             await e.Channel.SendMessage("Du kan ikke checke ind i denne kanal, da den ikke er relateret til en turnering.");
                         else if (!tourn.CheckInOpen)
-                            await e.Channel.SendMessage("Du kan ikke checke ind til den turneringen endnu. Vi åbner checkin kort tid tilmeldingen åbner.");
+                            await e.Channel.SendMessage("Du kan ikke checke ind til den turneringen endnu. Vi åbner checkin kort tid før tilmeldingen åbner.");
                         else if (tourn.Participants.Any(x => x.DisplayName == e.GetArg(paramHold) && x.TournamentID == tourn.ID))
                         {
                             int seatNum;
-                            if (int.TryParse(e.GetArg("Pladsnummer"), out seatNum) && seatNum > 0 && seatNum < 400) //TODO check if the seat has been taken - and maybe add website username
+                            if (int.TryParse(e.GetArg(paramSeat), out seatNum) && seatNum > 0 && seatNum < 400) //TODO check if the seat has been taken - and maybe add website username
                             {
                                 var args = new UserCheckedInEventArgs
                                 {
@@ -93,10 +94,34 @@ namespace ChallongeDiscordBot
                                 await e.Channel.SendMessage($"{e.GetArg(paramSeat)} er ikke et gyldigt pladsnr.");
                         }
                         else
-                            await e.Channel.SendMessage($"Holdet '{e.GetArg(paramHold)}' ser ikke ud til at være tilmeldt {tourn.ShortName} turneringen");
+                            await e.Channel.SendMessage($"Holdet '{e.GetArg(paramHold)}' ser ikke ud til at være tilmeldt {tourn.ShortName} turneringen. Tilmeld jer turneringen på http://www.nordicnetparty.dk/index.php?option=com_nnp-challonge og derefter checkin her igen.");
                     }
                 });
 
+            #endregion
+
+            #region Info
+            Bot.GetService<CommandService>().CreateCommand("info")
+                .Description("Grundlæggende information om turneringen")
+                .Do(async e =>
+                {
+                    using (var db = new DiscordChallongeDatabase())
+                    {
+                        var tourn = await db.Tournaments.FirstOrDefaultAsync(x => x.ShortName == e.Channel.Name);
+                        if (tourn == null)
+                            await e.Channel.SendMessage("Denne kanal er ikke relateret til en turnering.");
+                        else
+                        {
+                            string message = $"{tourn.Name}.";
+                            if (!tourn.CheckInOpen)
+                                message += Environment.NewLine + "Det er ikke muligt at checke ind til denne turnering endnu. Vi åbner checkin kort tid før tilmeldingen åbner.";
+                            message += Environment.NewLine + "Læs regler og se brackets her: " + tourn.FullLink;
+
+                            await e.Channel.SendMessage(message);
+                        }
+
+                    }
+                });
             #endregion
         }
 
@@ -141,7 +166,7 @@ namespace ChallongeDiscordBot
             {
                 await messageEventArgs.Channel.SendMessage($"For at checke ind, skal du skrive `{BOT_PREFIX}checkin <Holdnavn> <Pladsnummer>`");
             }
-            else if (userMessage == "help" || userMessage.StartsWith("checkin")) { } //handled with commands
+            else if (userMessage == "help" || userMessage.StartsWith("checkin") || userMessage == "info") { } //handled with commands
             else
             { 
                 await messageEventArgs.Channel.SendMessage("Undskyld, jeg forstår ikke hvad du vil :confused:");
@@ -157,7 +182,7 @@ namespace ChallongeDiscordBot
         {
             channel = channel.ToLower();
 
-            if (await CreateChannel(channel) && Channels.ContainsKey(channel))
+            if (CreateChannel(channel) && Channels.ContainsKey(channel))
                 SendMessage(rawMessage, Channels[channel]);
         }
 
@@ -166,19 +191,23 @@ namespace ChallongeDiscordBot
             await channel.SendMessage(rawMessage);
         }
 
-        public async Task<bool> CreateChannel(string channelName)
+        private object CreateChannelLock = new Object();
+        public bool CreateChannel(string channelName)
         {
             channelName = channelName.ToLower();
 
             if (Channels.ContainsKey(channelName))
                 return true;
 
-            Channel newChan = await Server.CreateChannel(channelName, ChannelType.Text);
-            bool success = newChan != null;
-            if (success)
-                Channels.Add(channelName, newChan);
+            lock (CreateChannelLock)
+            {
+                Channel newChan = Server.CreateChannel(channelName, ChannelType.Text).Result;
+                bool success = newChan != null;
+                if (success)
+                    Channels.Add(channelName, newChan);
 
-            return success;
+                return success;
+            }
         }
 
         private static bool MessageIsForMe(MessageEventArgs input, out string userMessage)
