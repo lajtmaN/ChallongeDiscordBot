@@ -13,7 +13,7 @@ namespace ChallongeDiscordBot
 {
     public class DiscordBot
     {
-        public const string BOT_PREFIX = "$";
+        public const string BOT_PREFIX = "!";
         private DiscordClient Bot { get; }
         private Profile BotProfile { get; set; } 
 
@@ -50,7 +50,7 @@ namespace ChallongeDiscordBot
             Bot.MessageReceived += ClientOnMessageReceived;
             Bot.UsingCommands(x =>
             {
-                x.PrefixChar = '$';
+                x.PrefixChar = '!';
                 x.HelpMode = HelpMode.Public;
             });
             CreateCommands();
@@ -75,7 +75,7 @@ namespace ChallongeDiscordBot
                             await e.Channel.SendMessage("Du kan ikke checke ind i denne kanal, da den ikke er relateret til en turnering.");
                         else if (!tourn.CheckInOpen)
                             await e.Channel.SendMessage("Du kan ikke checke ind til den turneringen endnu. Vi åbner checkin kort tid før tilmeldingen åbner.");
-                        else if (tourn.Participants.Any(x => x.DisplayName == e.GetArg(paramHold) && x.TournamentID == tourn.ID))
+                        else if (tourn.Participants.Any(x => x.DisplayName.ToLower() == e.GetArg(paramHold).ToLower() && x.TournamentID == tourn.ID))
                         {
                             int seatNum;
                             if (int.TryParse(e.GetArg(paramSeat), out seatNum) && seatNum > 0 && seatNum < 400) //TODO check if the seat has been taken - and maybe add website username

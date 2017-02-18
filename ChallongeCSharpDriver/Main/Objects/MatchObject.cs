@@ -39,6 +39,7 @@ namespace ChallongeCSharpDriver.Main.Objects {
                 case "pending":
                     matchState = MatchState.Pending;
                     break;
+                case "complete":
                 case "completed":
                     matchState = MatchState.Complete;
                     break;

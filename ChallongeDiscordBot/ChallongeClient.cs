@@ -97,7 +97,7 @@ namespace ChallongeDiscordBot
                     }
                     else if (!chalPart.active && exist)
                     {
-                        Database.Participants.Remove(participant);
+                        //Database.Participants.Remove(participant);
                     }
                 }
             }
@@ -137,10 +137,10 @@ namespace ChallongeDiscordBot
                 {
                     Match = challongeMatch,
                     Tournament = challongeTournament,
-                    Team1DiscordName = team1.DiscordMentionName,
-                    Team1SeatNum = team1.SeatNum,
-                    Team2DiscordName = team2.DiscordMentionName,
-                    Team2SeatNum = team2.SeatNum
+                    Team1DiscordName = team1?.DiscordMentionName,
+                    Team1SeatNum = team1?.SeatNum,
+                    Team2DiscordName = team2?.DiscordMentionName,
+                    Team2SeatNum = team2?.SeatNum
                 };
                 OnNewMatchStarted?.Invoke(this, args);
 
@@ -180,14 +180,20 @@ namespace ChallongeDiscordBot
             participant.DiscordMentionName = discordMention;
             participant.CheckedIn = true;
 
+            await Database.SaveChangesAsync();
+
             if (!alreadyCheckedIn)
             {
-                string fullTournamentId = (await Database.Tournaments.FindAsync(tournamentId))?.ChallongeIDWithSubdomain;
-                if (fullTournamentId.HasValue())
-                    await ParticipantCheckInQuery.CheckIn(fullTournamentId, participant.ID, Caller);
+                try
+                {
+                    string fullTournamentId =
+                        (await Database.Tournaments.FindAsync(tournamentId))?.ChallongeIDWithSubdomain;
+                    if (fullTournamentId.HasValue())
+                        await ParticipantCheckInQuery.CheckIn(fullTournamentId, participant.ID, Caller);
+                }
+                catch(Exception) { }
             }
 
-            await Database.SaveChangesAsync();
         }
     }
 

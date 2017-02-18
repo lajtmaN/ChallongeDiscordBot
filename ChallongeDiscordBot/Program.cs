@@ -14,14 +14,24 @@ namespace ChallongeDiscordBot
     {
         static void Main(string[] args)
         {
-            ChallongeDiscordBotConfig config = LoadConfig();
-            new ChallongeDiscordBot(config);
+            while (true)
+            {
+                try
+                {
+                    ChallongeDiscordBotConfig config = LoadConfig();
+                    new ChallongeDiscordBot(config);
 
-            string TurnOffCommand = "DIE";
-            string readline;
-            while ((readline = Console.ReadLine()) != TurnOffCommand);
+                    string TurnOffCommand = "DIE";
+                    string readline;
+                    while ((readline = Console.ReadLine()) != TurnOffCommand) ;
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("Exception.." + e.Message);
+                }
+            }
         }
-        
+
         private static ChallongeDiscordBotConfig LoadConfig()
         {
             var config = ConfigurationManager.GetSection("BotConfig") as ChallongeDiscordBotConfigSection;
