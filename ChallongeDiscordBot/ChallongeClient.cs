@@ -172,28 +172,29 @@ namespace ChallongeDiscordBot
 
         public async void CheckUserIn(int tournamentId, string teamDisplayName, string discordUserName, string discordMention, int seatNum)
         {
-            Participant participant = await Database.Participants.FirstAsync(x => x.DisplayName == teamDisplayName && x.TournamentID == tournamentId);
-            bool alreadyCheckedIn = participant.CheckedIn;
-
-            participant.SeatNum = seatNum;
-            participant.DiscordUserName = discordUserName;
-            participant.DiscordMentionName = discordMention;
-            participant.CheckedIn = true;
-
-            await Database.SaveChangesAsync();
-
-            if (!alreadyCheckedIn)
+            try
             {
-                try
+                Participant participant = await Database.Participants.FirstAsync(x => x.DisplayName == teamDisplayName && x.TournamentID == tournamentId);
+                bool alreadyCheckedIn = participant.CheckedIn;
+
+                participant.SeatNum = seatNum;
+                participant.DiscordUserName = discordUserName;
+                participant.DiscordMentionName = discordMention;
+                participant.CheckedIn = true;
+
+                await Database.SaveChangesAsync();
+
+                if (!alreadyCheckedIn)
                 {
+
                     string fullTournamentId =
                         (await Database.Tournaments.FindAsync(tournamentId))?.ChallongeIDWithSubdomain;
                     if (fullTournamentId.HasValue())
                         await ParticipantCheckInQuery.CheckIn(fullTournamentId, participant.ID, Caller);
-                }
-                catch(Exception) { }
-            }
 
+                }
+            }
+            catch (Exception) { }
         }
     }
 
